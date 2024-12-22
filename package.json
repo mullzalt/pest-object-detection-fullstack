@@ -1,0 +1,9 @@
+{
+  "name": "deteksi-hama-react",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
+
