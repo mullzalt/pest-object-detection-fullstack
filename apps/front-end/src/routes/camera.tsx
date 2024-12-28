@@ -8,6 +8,61 @@ export const Route = createFileRoute("/camera")({
   component: HomeComponent,
 });
 
+type CameraFacing = "user" | "environment";
+
+const API_RESOLUTION = {
+  w: 640,
+  h: 640,
+};
+
+interface AdjustRatioOptions {
+  canvasHeight: number;
+  canvasWidth: number;
+}
+
+interface AdjustPositionOptions {
+  videoWidth: number;
+  videoHeight: number;
+}
+
+const adjustRatio = ({ canvasHeight, canvasWidth }: AdjustRatioOptions) => {
+  const { w, h } = API_RESOLUTION;
+
+  const wScaleFactor = w / canvasHeight;
+  const hScaleFactor = h / canvasWidth;
+
+  const adjustedWidth = canvasWidth * wScaleFactor;
+  const adjustedHeight = canvasHeight * hScaleFactor;
+
+  return {
+    xOffset: (adjustedWidth - w) / 2,
+    yOffset: (adjustedHeight - h) / 2,
+  };
+};
+
+const adjustPosition = ({ videoHeight, videoWidth }: AdjustPositionOptions) => {
+  const { w, h } = API_RESOLUTION;
+  const videoAspectRatio = videoWidth / videoHeight;
+  const apiAspectRatio = w / h; // 640x640 is square
+
+  let xOffset = 0;
+  let yOffset = 0;
+
+  if (videoAspectRatio > apiAspectRatio) {
+    // Video is wider than API's square input
+    const scaleFactor = w / videoHeight; // Height determines scaling
+    const adjustedWidth = videoWidth * scaleFactor;
+    xOffset = (adjustedWidth - w) / 2; // Calculate horizontal padding
+  } else if (videoAspectRatio < apiAspectRatio) {
+    // Video is taller than API's square input
+    const scaleFactor = h / videoWidth; // Width determines scaling
+    const adjustedHeight = videoHeight * scaleFactor;
+    yOffset = (adjustedHeight - h) / 2; // Calculate vertical padding
+  }
+
+  return { xOffset, yOffset };
+};
+
 interface DetectionResponse {
   xmin: number;
   ymin: number;
@@ -18,28 +73,45 @@ interface DetectionResponse {
   name: string;
 }
 
-const videoConstraints = {
-  width: 1280,
-  height: 720,
-  facingMode: "user",
-};
-
-const IMAGE_OPTION = {
-  width: 640,
-  heigth: 640,
-};
-
 function HomeComponent() {
   const webcamRef = React.useRef<Webcam>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-
-  const { width, heigth } = IMAGE_OPTION;
+  const [facingMode, setFactingMode] = React.useState<CameraFacing>("user");
 
   const [detection, setDetection] = React.useState<DetectionResponse[]>([]);
-  const capture = React.useCallback(() => {
-    if (!webcamRef.current) return;
-    const imageSrc = webcamRef.current.getScreenshot();
-  }, [webcamRef]);
+
+  const setCanvasScale = React.useCallback(() => {
+    if (!canvasRef.current || !webcamRef.current) return;
+
+    if (!webcamRef.current.video) return;
+
+    const { offsetWidth, offsetHeight } = webcamRef.current.video;
+
+    canvasRef.current.width = offsetWidth;
+    canvasRef.current.height = offsetHeight;
+  }, [webcamRef, canvasRef]);
+
+  const getPosition = React.useCallback(
+    ({ xmax, xmin, ymax, ymin }: DetectionResponse) => {
+      const width = Math.abs(xmax - xmin);
+      const height = Math.abs(ymax - ymin);
+
+      const textY = ymin - 5 <= 0 ? ymin + 10 : ymin - 5;
+      const textX = xmin;
+
+      return {
+        xmin,
+        xmax,
+        ymin,
+        ymax,
+        width,
+        height,
+        textY,
+        textX,
+      };
+    },
+    [],
+  );
 
   const drawDetection = React.useCallback(
     (res: DetectionResponse[]) => {
@@ -49,22 +121,25 @@ function HomeComponent() {
 
       if (!ctx) return;
 
-      ctx.clearRect(0, 0, width, heigth);
+      setCanvasScale();
+
+      const { height: canvasHeight, width: canvasWidth } = canvasRef.current;
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       if (!res.length) return;
 
       res.map((r) => {
         ctx.beginPath();
         ctx.fillStyle = "#FF0000";
-        const { xmax, xmin, ymin, ymax, confidence, name, class: _class } = r;
-        const height = Math.abs(ymax - ymin);
-        const width = Math.abs(xmax - xmin);
-        ctx.fillText(`${_class}:${name} ${confidence}`, xmax, ymax - 5);
-        ctx.rect(xmin, ymin, height, width);
+        const { confidence, name, class: _class } = r;
+        const { width, height, xmin, ymin, textX, textY } = getPosition(r);
+        ctx.fillText(`${_class}:${name} ${confidence}`, textX, textY);
+        ctx.rect(xmin, ymin, width, height);
         ctx.stroke();
       });
     },
-    [canvasRef],
+    [canvasRef, webcamRef],
   );
 
   const captureFrame = React.useCallback(async () => {
@@ -85,62 +160,56 @@ function HomeComponent() {
       })
       .then((res) => {
         drawDetection(res.data);
-        setDetection(res.data);
       })
-      .catch(() => {
-        setDetection([]);
-      });
+      .catch((err) => {});
   }, [webcamRef]);
 
-  const prepareCanvas = React.useCallback(() => {
-    if (!canvasRef.current || !webcamRef.current?.video) return;
-
-    const { videoWidth, videoHeight } = webcamRef.current.video;
-    canvasRef.current.width = videoWidth;
-    canvasRef.current.height = videoHeight;
-  }, [webcamRef, canvasRef]);
-
-  // React.useEffect(() => {
-  //   const interval = setInterval(() => captureFrame(), 500);
-  //   return () => clearInterval(interval);
-  // }, [captureFrame]);
-
-  React.useEffect(() => {
-    prepareCanvas();
-    drawDummy();
-  }, [webcamRef, canvasRef]);
+  const switchCamera = React.useCallback(() => {
+    setFactingMode(facingMode === "user" ? "environment" : "user");
+  }, [facingMode]);
 
   const drawDummy = React.useCallback(() => {
     drawDetection([
       {
-        xmax: 20,
-        xmin: 0,
-        ymax: 20,
-        ymin: 0,
+        xmax: 630,
+        xmin: 10,
+        ymax: 630,
+        ymin: 10,
         class: 0,
         name: "Test",
         confidence: 0.004,
       },
     ]);
   }, [drawDetection]);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => captureFrame(), 500);
+    return () => clearInterval(interval);
+  }, [captureFrame]);
+
   return (
     <div className="flex flex-col gap-4 min-h-screen relative">
-      <div className="relative w-full h-full">
+      <pre>{JSON.stringify(detection, null, 2)}</pre>
+      <div className="relative w-fit h-fit mx-auto">
         <Webcam
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
+          width={640}
+          height={640}
           videoConstraints={{
-            width: 640,
-            height: 640,
-            facingMode: "user",
+            width: API_RESOLUTION.w,
+            height: API_RESOLUTION.h,
+            aspectRatio: 1 / 1,
+            facingMode,
           }}
-          mirrored
+          mirrored={facingMode === "user"}
           disablePictureInPicture
         />
         <canvas ref={canvasRef} className="absolute top-0 left-0 z-50" />
       </div>
       <Button onClick={drawDummy}>draw</Button>
+      <Button onClick={switchCamera}>Switch Camera</Button>
     </div>
   );
 }

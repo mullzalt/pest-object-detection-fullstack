@@ -11,16 +11,16 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as OnnxImport } from './routes/onnx'
+import { Route as ConfigImport } from './routes/config'
 import { Route as CameraImport } from './routes/camera'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
-const OnnxRoute = OnnxImport.update({
-  id: '/onnx',
-  path: '/onnx',
+const ConfigRoute = ConfigImport.update({
+  id: '/config',
+  path: '/config',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -67,11 +67,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CameraImport
       parentRoute: typeof rootRoute
     }
-    '/onnx': {
-      id: '/onnx'
-      path: '/onnx'
-      fullPath: '/onnx'
-      preLoaderRoute: typeof OnnxImport
+    '/config': {
+      id: '/config'
+      path: '/config'
+      fullPath: '/config'
+      preLoaderRoute: typeof ConfigImport
       parentRoute: typeof rootRoute
     }
   }
@@ -83,14 +83,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/camera': typeof CameraRoute
-  '/onnx': typeof OnnxRoute
+  '/config': typeof ConfigRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/camera': typeof CameraRoute
-  '/onnx': typeof OnnxRoute
+  '/config': typeof ConfigRoute
 }
 
 export interface FileRoutesById {
@@ -98,15 +98,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/camera': typeof CameraRoute
-  '/onnx': typeof OnnxRoute
+  '/config': typeof ConfigRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/camera' | '/onnx'
+  fullPaths: '/' | '/about' | '/camera' | '/config'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/camera' | '/onnx'
-  id: '__root__' | '/' | '/about' | '/camera' | '/onnx'
+  to: '/' | '/about' | '/camera' | '/config'
+  id: '__root__' | '/' | '/about' | '/camera' | '/config'
   fileRoutesById: FileRoutesById
 }
 
@@ -114,14 +114,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   CameraRoute: typeof CameraRoute
-  OnnxRoute: typeof OnnxRoute
+  ConfigRoute: typeof ConfigRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   CameraRoute: CameraRoute,
-  OnnxRoute: OnnxRoute,
+  ConfigRoute: ConfigRoute,
 }
 
 export const routeTree = rootRoute
@@ -137,7 +137,7 @@ export const routeTree = rootRoute
         "/",
         "/about",
         "/camera",
-        "/onnx"
+        "/config"
       ]
     },
     "/": {
@@ -149,8 +149,8 @@ export const routeTree = rootRoute
     "/camera": {
       "filePath": "camera.tsx"
     },
-    "/onnx": {
-      "filePath": "onnx.tsx"
+    "/config": {
+      "filePath": "config.tsx"
     }
   }
 }
