@@ -1,20 +1,19 @@
 {
-  "name": "@hama/config",
+  "name": "@hama/logger",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "pino-pretty": "^13.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "dotenv-expand": "^12.0.1",
-    "zod": "^3.24.1"
+    "@hama/config": "workspace:*",
+    "pino": "^9.6.0"
   },
   "exports": {
     ".": "./src/index.ts"
   }
 }
-

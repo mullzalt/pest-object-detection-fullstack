@@ -1,5 +1,5 @@
 {
-  "name": "@hama/config",
+  "name": "@hama/server",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
@@ -9,12 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "dotenv-expand": "^12.0.1",
-    "zod": "^3.24.1"
-  },
-  "exports": {
-    ".": "./src/index.ts"
+    "@hono/zod-validator": "^0.4.2",
+    "hono": "^4.6.15"
   }
 }
-
