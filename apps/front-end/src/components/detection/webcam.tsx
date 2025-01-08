@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
 
 type CameraFacing = "user" | "environment";
 
+const toPercent = (num: number): string => {
+  return (num * 100).toFixed(2) + "%";
+};
+
 function DetectionStatus() {
   const { status } = useDetection();
 
@@ -104,12 +108,28 @@ export function DetectionCamera() {
 
       res.map((r) => {
         ctx.beginPath();
-        ctx.fillStyle = "#FF0000";
         const { confidence, name, class: _class } = r;
         const { width, height, xmin, ymin, textX, textY } = getPosition(r);
-        ctx.fillText(`${_class}:${name} ${confidence}`, textX, textY);
+
+        // Draw the rectangle
+        ctx.strokeStyle = "red"; // Set rectangle stroke color
+        ctx.lineWidth = 1; // Set rectangle stroke width
         ctx.rect(xmin, ymin, width, height);
         ctx.stroke();
+
+        // Draw the text
+        const text = `${_class}:${name} ${toPercent(confidence)}`;
+        ctx.font = "14px sans";
+        ctx.textBaseline = "top"; // Align text to top for better positioning
+
+        // Draw text outline
+        ctx.lineWidth = 2; // Set the text outline thickness
+        ctx.strokeStyle = "black"; // Set text outline color
+        ctx.strokeText(text, textX, textY);
+
+        // Fill text
+        ctx.fillStyle = "#FFFFFF"; // Set text fill color
+        ctx.fillText(text, textX, textY);
       });
     },
     [canvasRef, webcamRef],

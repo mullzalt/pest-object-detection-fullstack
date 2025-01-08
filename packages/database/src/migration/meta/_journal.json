@@ -8,6 +8,13 @@
       "when": 1735544038869,
       "tag": "0000_condemned_martin_li",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1736340644295,
+      "tag": "0001_slim_taskmaster",
+      "breakpoints": true
     }
   ]
 }

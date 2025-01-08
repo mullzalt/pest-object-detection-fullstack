@@ -11,22 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as ConfigImport } from './routes/config'
-import { Route as CameraImport } from './routes/camera'
+import { Route as SignInImport } from './routes/sign-in'
 import { Route as AboutImport } from './routes/about'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthenticatedConfigImport } from './routes/_authenticated/config'
+import { Route as AuthenticatedCameraImport } from './routes/_authenticated/camera'
+import { Route as AuthenticatedReportsIndexImport } from './routes/_authenticated/reports/index'
+import { Route as AuthenticatedReportsReportIdImport } from './routes/_authenticated/reports/$reportId'
 
 // Create/Update Routes
 
-const ConfigRoute = ConfigImport.update({
-  id: '/config',
-  path: '/config',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const CameraRoute = CameraImport.update({
-  id: '/camera',
-  path: '/camera',
+const SignInRoute = SignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -36,11 +34,41 @@ const AboutRoute = AboutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const AuthenticatedConfigRoute = AuthenticatedConfigImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedCameraRoute = AuthenticatedCameraImport.update({
+  id: '/camera',
+  path: '/camera',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedReportsIndexRoute = AuthenticatedReportsIndexImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedReportsReportIdRoute =
+  AuthenticatedReportsReportIdImport.update({
+    id: '/reports/$reportId',
+    path: '/reports/$reportId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -53,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -60,68 +95,144 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
-    '/camera': {
-      id: '/camera'
-      path: '/camera'
-      fullPath: '/camera'
-      preLoaderRoute: typeof CameraImport
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInImport
       parentRoute: typeof rootRoute
     }
-    '/config': {
-      id: '/config'
+    '/_authenticated/camera': {
+      id: '/_authenticated/camera'
+      path: '/camera'
+      fullPath: '/camera'
+      preLoaderRoute: typeof AuthenticatedCameraImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/config': {
+      id: '/_authenticated/config'
       path: '/config'
       fullPath: '/config'
-      preLoaderRoute: typeof ConfigImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedConfigImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/reports/$reportId': {
+      id: '/_authenticated/reports/$reportId'
+      path: '/reports/$reportId'
+      fullPath: '/reports/$reportId'
+      preLoaderRoute: typeof AuthenticatedReportsReportIdImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/reports/': {
+      id: '/_authenticated/reports/'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedCameraRoute: typeof AuthenticatedCameraRoute
+  AuthenticatedConfigRoute: typeof AuthenticatedConfigRoute
+  AuthenticatedReportsReportIdRoute: typeof AuthenticatedReportsReportIdRoute
+  AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCameraRoute: AuthenticatedCameraRoute,
+  AuthenticatedConfigRoute: AuthenticatedConfigRoute,
+  AuthenticatedReportsReportIdRoute: AuthenticatedReportsReportIdRoute,
+  AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/camera': typeof CameraRoute
-  '/config': typeof ConfigRoute
+  '/sign-in': typeof SignInRoute
+  '/camera': typeof AuthenticatedCameraRoute
+  '/config': typeof AuthenticatedConfigRoute
+  '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
+  '/reports': typeof AuthenticatedReportsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/camera': typeof CameraRoute
-  '/config': typeof ConfigRoute
+  '/sign-in': typeof SignInRoute
+  '/camera': typeof AuthenticatedCameraRoute
+  '/config': typeof AuthenticatedConfigRoute
+  '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
+  '/reports': typeof AuthenticatedReportsIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/camera': typeof CameraRoute
-  '/config': typeof ConfigRoute
+  '/sign-in': typeof SignInRoute
+  '/_authenticated/camera': typeof AuthenticatedCameraRoute
+  '/_authenticated/config': typeof AuthenticatedConfigRoute
+  '/_authenticated/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
+  '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/camera' | '/config'
+  fullPaths:
+    | '/'
+    | ''
+    | '/about'
+    | '/sign-in'
+    | '/camera'
+    | '/config'
+    | '/reports/$reportId'
+    | '/reports'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/camera' | '/config'
-  id: '__root__' | '/' | '/about' | '/camera' | '/config'
+  to:
+    | '/'
+    | ''
+    | '/about'
+    | '/sign-in'
+    | '/camera'
+    | '/config'
+    | '/reports/$reportId'
+    | '/reports'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about'
+    | '/sign-in'
+    | '/_authenticated/camera'
+    | '/_authenticated/config'
+    | '/_authenticated/reports/$reportId'
+    | '/_authenticated/reports/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
-  CameraRoute: typeof CameraRoute
-  ConfigRoute: typeof ConfigRoute
+  SignInRoute: typeof SignInRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
-  CameraRoute: CameraRoute,
-  ConfigRoute: ConfigRoute,
+  SignInRoute: SignInRoute,
 }
 
 export const routeTree = rootRoute
@@ -135,22 +246,44 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/_authenticated",
         "/about",
-        "/camera",
-        "/config"
+        "/sign-in"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/camera",
+        "/_authenticated/config",
+        "/_authenticated/reports/$reportId",
+        "/_authenticated/reports/"
+      ]
+    },
     "/about": {
       "filePath": "about.tsx"
     },
-    "/camera": {
-      "filePath": "camera.tsx"
+    "/sign-in": {
+      "filePath": "sign-in.tsx"
     },
-    "/config": {
-      "filePath": "config.tsx"
+    "/_authenticated/camera": {
+      "filePath": "_authenticated/camera.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/config": {
+      "filePath": "_authenticated/config.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/reports/$reportId": {
+      "filePath": "_authenticated/reports/$reportId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/reports/": {
+      "filePath": "_authenticated/reports/index.tsx",
+      "parent": "/_authenticated"
     }
   }
 }
