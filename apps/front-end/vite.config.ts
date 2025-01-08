@@ -7,14 +7,27 @@ import path from "path";
 export default defineConfig({
   plugins: [TanStackRouterVite({}), react()],
   resolve: {
+    preserveSymlinks: true,
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
+    fs: {
+      strict: true,
+    },
+
     proxy: {
       "/v1/object-detection/yolov5": {
         target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/static": {
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

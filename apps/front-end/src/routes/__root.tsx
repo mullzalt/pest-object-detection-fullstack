@@ -1,9 +1,14 @@
 import * as React from "react";
-import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { ThemeProvider } from "@/components/theme-provider";
+import type { QueryClient } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/sonner";
 
-export const Route = createRootRoute({
+interface RouterContext {
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
 });
 
@@ -12,6 +17,7 @@ function RootComponent() {
     <>
       <ThemeProvider>
         <Outlet />
+        <Toaster />
       </ThemeProvider>
     </>
   );

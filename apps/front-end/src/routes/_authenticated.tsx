@@ -1,8 +1,18 @@
 import { Navbar } from "@/components/navbar";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { DetectionProvider } from "@/hooks/use-detection";
+import { validateSession } from "@/queries/auth";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    const user = await validateSession(context.queryClient);
+
+    if (!user)
+      throw redirect({
+        to: "/sign-in",
+      });
+  },
 });
 
 function RouteComponent() {
@@ -10,7 +20,9 @@ function RouteComponent() {
     <div className="flex flex-col min-h-screen relative">
       <Navbar />
       <main className="container p-0 md:p-4">
-        <Outlet />
+        <DetectionProvider>
+          <Outlet />
+        </DetectionProvider>
       </main>
     </div>
   );

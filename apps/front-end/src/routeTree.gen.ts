@@ -11,16 +11,24 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as AboutImport } from './routes/about'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfigImport } from './routes/_authenticated/config'
 import { Route as AuthenticatedCameraImport } from './routes/_authenticated/camera'
 import { Route as AuthenticatedReportsIndexImport } from './routes/_authenticated/reports/index'
 import { Route as AuthenticatedReportsReportIdImport } from './routes/_authenticated/reports/$reportId'
 
 // Create/Update Routes
+
+const SignUpRoute = SignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SignInRoute = SignInImport.update({
   id: '/sign-in',
@@ -43,6 +51,12 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 const AuthenticatedConfigRoute = AuthenticatedConfigImport.update({
@@ -102,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInImport
       parentRoute: typeof rootRoute
     }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
     '/_authenticated/camera': {
       id: '/_authenticated/camera'
       path: '/camera'
@@ -114,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/config'
       fullPath: '/config'
       preLoaderRoute: typeof AuthenticatedConfigImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardImport
       parentRoute: typeof AuthenticatedImport
     }
     '/_authenticated/reports/$reportId': {
@@ -138,6 +166,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedCameraRoute: typeof AuthenticatedCameraRoute
   AuthenticatedConfigRoute: typeof AuthenticatedConfigRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedReportsReportIdRoute: typeof AuthenticatedReportsReportIdRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
 }
@@ -145,6 +174,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCameraRoute: AuthenticatedCameraRoute,
   AuthenticatedConfigRoute: AuthenticatedConfigRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedReportsReportIdRoute: AuthenticatedReportsReportIdRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
 }
@@ -158,8 +188,10 @@ export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/camera': typeof AuthenticatedCameraRoute
   '/config': typeof AuthenticatedConfigRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
 }
@@ -169,8 +201,10 @@ export interface FileRoutesByTo {
   '': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/camera': typeof AuthenticatedCameraRoute
   '/config': typeof AuthenticatedConfigRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
 }
@@ -181,8 +215,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/_authenticated/camera': typeof AuthenticatedCameraRoute
   '/_authenticated/config': typeof AuthenticatedConfigRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
 }
@@ -194,8 +230,10 @@ export interface FileRouteTypes {
     | ''
     | '/about'
     | '/sign-in'
+    | '/sign-up'
     | '/camera'
     | '/config'
+    | '/dashboard'
     | '/reports/$reportId'
     | '/reports'
   fileRoutesByTo: FileRoutesByTo
@@ -204,8 +242,10 @@ export interface FileRouteTypes {
     | ''
     | '/about'
     | '/sign-in'
+    | '/sign-up'
     | '/camera'
     | '/config'
+    | '/dashboard'
     | '/reports/$reportId'
     | '/reports'
   id:
@@ -214,8 +254,10 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/sign-in'
+    | '/sign-up'
     | '/_authenticated/camera'
     | '/_authenticated/config'
+    | '/_authenticated/dashboard'
     | '/_authenticated/reports/$reportId'
     | '/_authenticated/reports/'
   fileRoutesById: FileRoutesById
@@ -226,6 +268,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
   SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -233,6 +276,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
 }
 
 export const routeTree = rootRoute
@@ -248,7 +292,8 @@ export const routeTree = rootRoute
         "/",
         "/_authenticated",
         "/about",
-        "/sign-in"
+        "/sign-in",
+        "/sign-up"
       ]
     },
     "/": {
@@ -259,6 +304,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/camera",
         "/_authenticated/config",
+        "/_authenticated/dashboard",
         "/_authenticated/reports/$reportId",
         "/_authenticated/reports/"
       ]
@@ -269,12 +315,19 @@ export const routeTree = rootRoute
     "/sign-in": {
       "filePath": "sign-in.tsx"
     },
+    "/sign-up": {
+      "filePath": "sign-up.tsx"
+    },
     "/_authenticated/camera": {
       "filePath": "_authenticated/camera.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/config": {
       "filePath": "_authenticated/config.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard": {
+      "filePath": "_authenticated/dashboard.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/reports/$reportId": {

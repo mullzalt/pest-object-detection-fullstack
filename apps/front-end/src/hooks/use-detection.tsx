@@ -19,6 +19,11 @@ export interface DetectionContextValue {
   isError: boolean;
   error?: string;
   status: DetectionStatus;
+  blob?: Blob;
+  isRecording: boolean;
+  setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
+  currentId?: string;
+  setCurrentId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 const DetectionContext = React.createContext<DetectionContextValue | null>(
@@ -39,6 +44,9 @@ export const DetectionProvider = ({
   const [error, setError] = React.useState<string | undefined>();
   const [retryCount, setRetryCount] = React.useState<number>(0);
   const [status, setStatus] = React.useState<DetectionStatus>("checking");
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [blob, setBlob] = React.useState<Blob>();
+  const [currentId, setCurrentId] = React.useState<string | undefined>();
 
   const detect = React.useCallback(
     async (imgSrc: string | null) => {
@@ -59,6 +67,7 @@ export const DetectionProvider = ({
           setStatus("online");
           setRetryCount(0);
           setDetections(res.data);
+          setBlob(imageBlob);
           return;
         })
         .catch((err: AxiosError) => {
@@ -85,8 +94,24 @@ export const DetectionProvider = ({
       detections,
       status,
       isError,
+      blob,
+      setIsRecording,
+      isRecording,
+      currentId,
+      setCurrentId,
     }),
-    [error, detect, detections, status, isError],
+    [
+      error,
+      detect,
+      detections,
+      status,
+      isError,
+      blob,
+      isRecording,
+      setIsRecording,
+      currentId,
+      setCurrentId,
+    ],
   );
 
   return (

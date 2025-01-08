@@ -2,6 +2,10 @@
   "name": "@hama/server",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun run --hot ./src/index.ts",
+    "show-route": "bun run bin/show-route.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -20,5 +24,8 @@
     "hono": "^4.6.15",
     "lucia": "^3.2.2",
     "oslo": "^1.2.1"
+  },
+  "exports": {
+    "./client": "./src/clients/index.ts"
   }
 }

@@ -13,8 +13,11 @@ const detectionSchema = z.object({
 });
 
 export const createReportDetailSchema = z.object({
-  image: fileUpload({ fileTypes: [".jpeg"], maxByteSize: toByte(500, "KB") }),
   detections: z.array(detectionSchema),
+});
+
+export const uploadImageSchema = z.object({
+  image: fileUpload({ fileTypes: [".jpeg"], maxByteSize: toByte(500, "KB") }),
 });
 
 export type CreateReportDetail = z.infer<typeof createReportDetailSchema>;

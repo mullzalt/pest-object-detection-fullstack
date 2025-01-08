@@ -1,9 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { LoginForm } from "@/components/form/login-form";
+import { validateSession } from "@/queries/auth";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/sign-in')({
+export const Route = createFileRoute("/sign-in")({
   component: RouteComponent,
-})
+  beforeLoad: async ({ context }) => {
+    const data = await validateSession(context.queryClient);
+
+    if (data) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
+});
 
 function RouteComponent() {
-  return <div>Hello "/sign-in"!</div>
+  return (
+    <div className="min-h-screen flex flex-col relative items-center justify-center">
+      <LoginForm />
+    </div>
+  );
 }

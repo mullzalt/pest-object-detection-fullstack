@@ -13,50 +13,63 @@ import {
 } from "@/components/ui/sheet";
 
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { Menu } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
 import { LogoIcon } from "./icons";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { signOut, type SessionUser } from "@/queries/auth";
 
 interface RouteProps {
-  href: string;
+  to: string;
   label: string;
 }
 
 const routeList: RouteProps[] = [
   {
-    href: "#features",
-    label: "Features",
+    to: "/camera",
+    label: "Deteksi",
   },
   {
-    href: "#testimonials",
-    label: "Testimonials",
-  },
-  {
-    href: "#pricing",
-    label: "Pricing",
-  },
-  {
-    href: "#faq",
-    label: "FAQ",
+    to: "/reports",
+    label: "Laporan",
   },
 ];
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const queryKey = ["session"];
+
+  const { mutate: logout, isPending } = useMutation({
+    mutationFn: async () => await signOut({}),
+    onMutate: async () => {
+      queryClient.cancelQueries({ queryKey });
+      const prevSession = queryClient.getQueryData<SessionUser>(queryKey);
+      queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+
+      queryClient.setQueryData(queryKey, () => null);
+
+      return { prevSession };
+    },
+    onSuccess: async () => {
+      await navigate({ to: "/sign-in" });
+    },
+  });
   return (
     <header className="sticky border-b-[1px] top-0 z-40 w-full bg-white dark:border-b-slate-700 dark:bg-background">
       <NavigationMenu className="mx-auto">
         <NavigationMenuList className="container h-14 px-4 w-screen flex justify-between ">
           <NavigationMenuItem className="font-bold flex">
-            <a
+            <Link
               rel="noreferrer noopener"
-              href="/"
+              to="/dashboard"
               className="ml-2 font-bold text-xl flex"
             >
-              <LogoIcon />
-              ShadcnUI/React
-            </a>
+              Deteksi Hama
+            </Link>
           </NavigationMenuItem>
 
           {/* mobile */}
@@ -80,16 +93,15 @@ export const Navbar = () => {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col justify-center items-center gap-2 mt-4">
-                  {routeList.map(({ href, label }: RouteProps) => (
-                    <a
-                      rel="noreferrer noopener"
+                  {routeList.map(({ to, label }: RouteProps) => (
+                    <Link
                       key={label}
-                      href={href}
+                      to={to}
                       onClick={() => setIsOpen(false)}
                       className={buttonVariants({ variant: "ghost" })}
                     >
                       {label}
-                    </a>
+                    </Link>
                   ))}
                   <a
                     rel="noreferrer noopener"
@@ -110,29 +122,40 @@ export const Navbar = () => {
           {/* desktop */}
           <nav className="hidden md:flex gap-2">
             {routeList.map((route: RouteProps, i) => (
-              <a
+              <Link
                 rel="noreferrer noopener"
-                href={route.href}
+                to={route.to}
                 key={i}
                 className={`text-[17px] ${buttonVariants({
                   variant: "ghost",
                 })}`}
+                activeProps={{
+                  className: "bg-muted",
+                }}
               >
                 {route.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
           <div className="hidden md:flex gap-2">
-            <a
-              rel="noreferrer noopener"
-              href="https://github.com/leoMirandaa/shadcn-landing-page.git"
-              target="_blank"
-              className={`border ${buttonVariants({ variant: "secondary" })}`}
+            {/* <a */}
+            {/*   rel="noreferrer noopener" */}
+            {/*   href="https://github.com/leoMirandaa/shadcn-landing-page.git" */}
+            {/*   target="_blank" */}
+            {/*   className={`border ${buttonVariants({ variant: "secondary" })}`} */}
+            {/* > */}
+            {/*   <GitHubLogoIcon className="mr-2 w-5 h-5" /> */}
+            {/*   Github */}
+            {/* </a> */}
+
+            <Button
+              variant={"secondary"}
+              onClick={() => logout()}
+              disabled={isPending}
             >
-              <GitHubLogoIcon className="mr-2 w-5 h-5" />
-              Github
-            </a>
+              Sign Out
+            </Button>
 
             <ModeToggle />
           </div>

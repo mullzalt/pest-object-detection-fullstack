@@ -7,6 +7,7 @@ import type { LuciaContext } from "./lib/lucia-context";
 import { appLogger } from "./lib/logger";
 import { sessionHandler } from "./middlewares/session-hanler";
 import { errorHandler, notFoundHandler } from "./middlewares/error-handler";
+import { apiRoute } from "./routes";
 
 const app = new Hono<LuciaContext>();
 
@@ -15,7 +16,7 @@ app.use(trimTrailingSlash());
 
 app.use("*", cors(), sessionHandler());
 
-const appRoute = app.basePath("/api");
+const appRoute = app.basePath("/api").route("/", apiRoute);
 
 app.onError(errorHandler());
 app.notFound(notFoundHandler());

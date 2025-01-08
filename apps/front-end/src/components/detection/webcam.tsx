@@ -1,4 +1,4 @@
-import { Detection, useDetection } from "@/hooks/use-detection";
+import { type Detection, useDetection } from "@/hooks/use-detection";
 import * as React from "react";
 import Webcam from "react-webcam";
 import { Button } from "../ui/button";
@@ -39,21 +39,32 @@ function DetectionStatus() {
   return <span className={className()}>{status}</span>;
 }
 
-export function DetectionCamera() {
+export function DetectionCamera({
+  onCapture,
+  onRecordStart,
+  onRecordStop,
+  isLoading = false,
+}: {
+  onCapture?: (res: Detection[], file: File) => void;
+  onRecordStart?: () => void;
+  onRecordStop?: () => void;
+  isLoading?: boolean;
+}) {
   const webcamRef = React.useRef<Webcam>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
   const { detectionDelay, reportThrottle } = useDetectionConfig();
 
-  const reportCapture = useThrottledCallback(
-    (res: Detection[]) => console.log(res),
-    reportThrottle,
-  );
-
   const [facingMode, setFactingMode] = React.useState<CameraFacing>("user");
-  const [isRecording, setIsRecording] = React.useState(false);
 
-  const { detections, detect, status } = useDetection();
+  const { detections, detect, status, blob, isRecording, setIsRecording } =
+    useDetection();
+
+  const reportCapture = useThrottledCallback((res: Detection[]) => {
+    if (!blob) return;
+    const file = new File([blob], "file.jpg", { type: blob.type });
+    onCapture && onCapture(res, file);
+  }, reportThrottle);
 
   const setCanvasSize = React.useCallback(() => {
     if (!canvasRef.current || !webcamRef.current) return;
@@ -118,7 +129,7 @@ export function DetectionCamera() {
         ctx.stroke();
 
         // Draw the text
-        const text = `${_class}:${name} ${toPercent(confidence)}`;
+        const text = `${_class}:${name}: ${toPercent(confidence)}`;
         ctx.font = "14px sans";
         ctx.textBaseline = "top"; // Align text to top for better positioning
 
@@ -147,6 +158,9 @@ export function DetectionCamera() {
   }, [facingMode]);
 
   const toggleRecord = React.useCallback(() => {
+    if (!isRecording) {
+      onRecordStart && onRecordStart();
+    }
     setIsRecording(!isRecording);
   }, [isRecording]);
 
@@ -188,20 +202,40 @@ export function DetectionCamera() {
         />
         <canvas ref={canvasRef} className="absolute top-0 left-0 z-50" />
       </div>
-      <div className="flex justify-between items-center p-4">
-        <div></div>
-        {isRecording ? (
-          <Button variant={"outline"} size={"iconXl"} onClick={toggleRecord}>
-            <SquareIcon />
+      <div className="grid grid-cols-3 items-center p-4">
+        <div>
+          {isLoading && (
+            <span className="animate-pulse">Connecting recorder...</span>
+          )}
+        </div>
+        <div className="flex items-center justify-center">
+          {isRecording ? (
+            <Button
+              variant={"outline"}
+              size={"iconXl"}
+              onClick={() => {
+                onRecordStop && onRecordStop();
+              }}
+            >
+              <SquareIcon />
+            </Button>
+          ) : (
+            <Button
+              variant={"outline"}
+              size={"iconXl"}
+              onClick={() => {
+                onRecordStart && onRecordStart();
+              }}
+            >
+              <CircleIcon className="text-destructive" />
+            </Button>
+          )}
+        </div>
+        <div className="flex justify-center">
+          <Button variant={"ghost"} size={"icon"} onClick={switchCamera}>
+            <SwitchCameraIcon />
           </Button>
-        ) : (
-          <Button variant={"outline"} size={"iconXl"} onClick={toggleRecord}>
-            <CircleIcon className="text-destructive" />
-          </Button>
-        )}
-        <Button variant={"ghost"} size={"icon"} onClick={switchCamera}>
-          <SwitchCameraIcon />
-        </Button>
+        </div>
       </div>
     </div>
   );
