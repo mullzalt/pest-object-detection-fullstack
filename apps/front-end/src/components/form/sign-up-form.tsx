@@ -12,12 +12,17 @@ import { Label } from "@/components/ui/label";
 import { zodValidator } from "@tanstack/zod-form-adapter";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { signIn } from "@/queries/auth";
-import { signInSchema, type SignIn } from "@hama/data-access";
+import { signIn, signUp } from "@/queries/auth";
+import {
+  signInSchema,
+  signUpSchema,
+  type SignIn,
+  type SignUp,
+} from "@hama/data-access";
 import { useForm } from "@tanstack/react-form";
 import { FieldInfo } from "./field-info";
 
-export function LoginForm({
+export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -26,14 +31,14 @@ export function LoginForm({
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
-    mutationFn: signIn,
+    mutationFn: signUp,
   });
 
   const { Field, Subscribe, handleSubmit } = useForm({
-    defaultValues: {} as SignIn,
+    defaultValues: {} as SignUp,
     validatorAdapter: zodValidator(),
     validators: {
-      onChange: signInSchema,
+      onChange: signUpSchema,
     },
     onSubmit: ({ value, formApi }) => {
       mutateAsync(
@@ -55,6 +60,7 @@ export function LoginForm({
             });
 
             formApi.setFieldValue("password", () => "");
+            formApi.setFieldValue("confirmPassword", () => "");
           },
         },
       );
@@ -65,9 +71,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to create to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -128,6 +134,25 @@ export function LoginForm({
                   </div>
                 )}
               </Field>
+
+              <Field name="confirmPassword">
+                {(field) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor={field.name}>Confirm Password</Label>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="password"
+                    />
+                    <div className="text-xs">
+                      <FieldInfo field={field} />
+                    </div>
+                  </div>
+                )}
+              </Field>
               <Subscribe
                 selector={(state) => [state.isSubmitting, state.canSubmit]}
               >
@@ -137,15 +162,15 @@ export function LoginForm({
                     className="w-full"
                     disabled={!canSubmit || isSubmitting}
                   >
-                    Login
+                    Sign Up
                   </Button>
                 )}
               </Subscribe>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link to="/sign-up" className="underline underline-offset-4">
-                Sign Up
+              Already have an account?{" "}
+              <Link to="/sign-in" className="underline underline-offset-4">
+                Sign In
               </Link>
             </div>
           </form>

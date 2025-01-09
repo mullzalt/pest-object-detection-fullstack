@@ -38,7 +38,7 @@ const DetectionCanvas: React.FC<DetectionCanvasProps> = ({
           ctx.strokeRect(xmin, ymin, xmax - xmin, ymax - ymin);
 
           // Draw label and confidence
-          ctx.fillStyle = "red";
+          ctx.fillStyle = "white";
           ctx.font = "16px Arial";
           ctx.fillText(
             `${name} (${(confidence * 100).toFixed(1)}%)`,
