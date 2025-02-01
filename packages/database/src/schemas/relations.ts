@@ -14,3 +14,10 @@ export const reportsRelations = relations(reports, ({ many, one }) => ({
     references: [users.id],
   }),
 }));
+
+export const reportDetailsRelations = relations(reportDetails, ({one}) => ({
+  report: one(reports, {
+    fields: [reportDetails.reportId],
+    references: [reports.id]
+  })
+}))

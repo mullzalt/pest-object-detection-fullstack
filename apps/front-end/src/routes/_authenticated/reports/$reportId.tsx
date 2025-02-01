@@ -1,6 +1,7 @@
 import DetectionCanvas from "@/components/detection/image";
 import { ListComponent } from "@/components/list-component";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import type { Detection } from "@/hooks/use-detection";
 import { dateStringToLocale } from "@/lib/utils";
 import { reportDetailsQueryOptions } from "@/queries/reports";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -15,6 +16,12 @@ export const Route = createFileRoute("/_authenticated/reports/$reportId")({
     );
   },
 });
+
+function DetectionReader({detection}: { detection: Detection}){
+  return <div className="p-2 text-sm">
+    {`${detection.name} (${(detection.confidence * 100).toFixed(1)}%)`}
+  </div>
+}
 
 function RouteComponent() {
   const { reportId } = Route.useParams();
@@ -37,6 +44,10 @@ function RouteComponent() {
                     detections={detail.detections}
                     imageUrl={detail.image}
                   />
+                  <div className="grid gap-2">
+                  {detail.detections.map((detection) => <DetectionReader detection={detection}/>)}
+                  </div>
+                  
                 </CardContent>
                 <CardFooter className="gap-4">
                   <Clock3Icon /> {dateStringToLocale(detail.createdAt)}

@@ -58,7 +58,17 @@ export const reportService = () => {
 
   const getReports = async (userId: string) => {
     const data = await db.query.reports.findMany({
-      where: (col, { eq }) => eq(col.userId, userId),
+      // @ts-ignore
+      where: (col, { eq, and, exists }) =>
+        and(
+          eq(col.userId, userId),
+          exists(
+            db
+              .select({data: reportDetails.id})
+              .from(reportDetails)
+              .where(eq(reportDetails.reportId, col.id))
+          )
+        ),
       orderBy: (col, { desc }) => desc(col.createdAt),
     });
 
