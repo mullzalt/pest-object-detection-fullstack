@@ -1,6 +1,9 @@
 {
   "name": "deteksi-hama-react",
   "private": true,
+  "scripts": {
+    "dev": "bun --filter '*' dev"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"

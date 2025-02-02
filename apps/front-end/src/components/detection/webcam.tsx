@@ -7,6 +7,15 @@ import { useDetectionConfig } from "@/stores/config-store";
 import { useThrottledCallback } from "use-debounce";
 import { cn } from "@/lib/utils";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ListComponent } from "../list-component";
+
 type CameraFacing = "user" | "environment";
 
 const toPercent = (num: number): string => {
@@ -56,6 +65,8 @@ export function DetectionCamera({
   const { detectionDelay, reportThrottle } = useDetectionConfig();
 
   const [facingMode, setFactingMode] = React.useState<CameraFacing>("user");
+  const [devices, setDevices] = React.useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = React.useState<string>();
 
   const { detections, detect, status, blob, isRecording, setIsRecording } =
     useDetection();
@@ -164,6 +175,11 @@ export function DetectionCamera({
     setIsRecording(!isRecording);
   }, [isRecording]);
 
+  const handleDeviceChange = React.useCallback((deviceId: string) => {
+    setSelectedCameraId(deviceId);
+    setFactingMode("environment");
+  }, []);
+
   React.useEffect(() => {
     const interval = setInterval(() => capture(), detectionDelay);
     return () => clearInterval(interval);
@@ -173,9 +189,24 @@ export function DetectionCamera({
     drawDetection(detections);
   }, [detections]);
 
+  React.useEffect(() => {
+    const getDevices = async () => {
+      const deviceInfos = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = deviceInfos.filter(
+        (device) => device.kind === "videoinput" && device.deviceId,
+      );
+      setDevices(videoDevices);
+      if (videoDevices.length) {
+        setSelectedCameraId(videoDevices[0].deviceId); // Set the first available camera as default
+      }
+    };
+
+    getDevices();
+  }, []);
+
   return (
     <div className="flex flex-col w-full">
-      <div className="flex gap-2 text-sm p-4">
+      <div className="flex gap-2 text-sm p-4 items-center">
         <span className="font-semibold">Status:</span>
         <DetectionStatus />
         {isRecording ? (
@@ -183,6 +214,19 @@ export function DetectionCamera({
         ) : (
           <span>Idle</span>
         )}
+        <Select value={selectedCameraId} onValueChange={handleDeviceChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Camera" />
+          </SelectTrigger>
+          <SelectContent>
+            <ListComponent
+              data={devices}
+              render={(d) => (
+                <SelectItem value={d.deviceId}>{d.label}</SelectItem>
+              )}
+            />
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex relative mx-auto w-fit h-fit">
         <Webcam
@@ -192,6 +236,7 @@ export function DetectionCamera({
           width={640}
           height={640}
           videoConstraints={{
+            deviceId: selectedCameraId,
             width: 640,
             height: 640,
             aspectRatio: 1 / 1,

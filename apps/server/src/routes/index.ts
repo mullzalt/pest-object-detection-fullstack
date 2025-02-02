@@ -11,6 +11,7 @@ import {
 } from "@hama/data-access";
 import { authService } from "../services/auth";
 import { reportService } from "../services/report";
+import { statsService } from "../services/stats";
 
 const apiRoute = new Hono<LuciaContext>()
   .post("/auth/sign-in", zValidator("json", signInSchema), async (c) => {
@@ -40,6 +41,10 @@ const apiRoute = new Hono<LuciaContext>()
     const user = c.get("user")!;
     const { data } = await reportService().createReport(user.id);
     return serveJson(c, { data });
+  })
+  .get("/reports/statistics", verifySignedIn(), async (c) => {
+    const { data, metadata } = await statsService().getReportStats();
+    return serveJson(c, { data, metadata });
   })
   .get("/reports/:reportId", verifySignedIn(), async (c) => {
     const { reportId } = c.req.param();

@@ -9,6 +9,9 @@ import torch
 from flask import Flask, request
 from flask_cors import CORS
 
+import pathlib
+temp = pathlib.PosixPath
+
 app = Flask(__name__)
 CORS(app)
 

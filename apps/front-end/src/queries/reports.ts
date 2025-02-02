@@ -17,6 +17,8 @@ export const createReportDetail = createFetcher(
   apiClient.reports[":reportId"].details.$post,
 );
 
+export const getReportStats = createFetcher(apiClient.reports.statistics.$get);
+
 export const uploadReportImage = createFetcher(
   apiClient.reports[":reportId"].details[":detailId"].image.$post,
 );
@@ -33,6 +35,14 @@ export const reportsQueryOptions = () =>
   queryOptions({
     queryKey: ["reports"],
     queryFn: () => getReports({}),
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const statsQueryOptions = () =>
+  queryOptions({
+    queryKey: ["reports", "stats"],
+    queryFn: () => getReportStats({}),
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
