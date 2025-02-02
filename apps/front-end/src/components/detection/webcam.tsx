@@ -111,7 +111,7 @@ export function DetectionCamera({
         textX,
       };
     },
-    []
+    [],
   );
 
   const drawDetection = React.useCallback(
@@ -154,7 +154,7 @@ export function DetectionCamera({
         ctx.fillText(text, textX, textY);
       });
     },
-    [canvasRef, webcamRef]
+    [canvasRef, webcamRef],
   );
 
   const capture = React.useCallback(async () => {
@@ -193,10 +193,10 @@ export function DetectionCamera({
     const getDevices = async () => {
       const deviceInfos = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = deviceInfos.filter(
-        (device) => device.kind === "videoinput"
+        (device) => device.kind === "videoinput" && device.deviceId,
       );
       setDevices(videoDevices);
-      if (videoDevices.length > 0) {
+      if (videoDevices.length) {
         setSelectedCameraId(videoDevices[0].deviceId); // Set the first available camera as default
       }
     };

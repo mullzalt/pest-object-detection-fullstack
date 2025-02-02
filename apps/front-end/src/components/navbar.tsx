@@ -35,6 +35,10 @@ const routeList: RouteProps[] = [
     to: "/reports",
     label: "Laporan",
   },
+  {
+    to: "/statistics",
+    label: "Statistik",
+  },
 ];
 
 export const Navbar = () => {

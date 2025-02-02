@@ -16,6 +16,7 @@ import { Route as SignInImport } from './routes/sign-in'
 import { Route as AboutImport } from './routes/about'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthenticatedStatisticsImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfigImport } from './routes/_authenticated/config'
 import { Route as AuthenticatedCameraImport } from './routes/_authenticated/camera'
@@ -51,6 +52,12 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedStatisticsRoute = AuthenticatedStatisticsImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
@@ -144,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_authenticated/statistics': {
+      id: '/_authenticated/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof AuthenticatedStatisticsImport
+      parentRoute: typeof AuthenticatedImport
+    }
     '/_authenticated/reports/$reportId': {
       id: '/_authenticated/reports/$reportId'
       path: '/reports/$reportId'
@@ -167,6 +181,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCameraRoute: typeof AuthenticatedCameraRoute
   AuthenticatedConfigRoute: typeof AuthenticatedConfigRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedStatisticsRoute: typeof AuthenticatedStatisticsRoute
   AuthenticatedReportsReportIdRoute: typeof AuthenticatedReportsReportIdRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
 }
@@ -175,6 +190,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCameraRoute: AuthenticatedCameraRoute,
   AuthenticatedConfigRoute: AuthenticatedConfigRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedStatisticsRoute: AuthenticatedStatisticsRoute,
   AuthenticatedReportsReportIdRoute: AuthenticatedReportsReportIdRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
 }
@@ -192,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/camera': typeof AuthenticatedCameraRoute
   '/config': typeof AuthenticatedConfigRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/statistics': typeof AuthenticatedStatisticsRoute
   '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
 }
@@ -205,6 +222,7 @@ export interface FileRoutesByTo {
   '/camera': typeof AuthenticatedCameraRoute
   '/config': typeof AuthenticatedConfigRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/statistics': typeof AuthenticatedStatisticsRoute
   '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
 }
@@ -219,6 +237,7 @@ export interface FileRoutesById {
   '/_authenticated/camera': typeof AuthenticatedCameraRoute
   '/_authenticated/config': typeof AuthenticatedConfigRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/statistics': typeof AuthenticatedStatisticsRoute
   '/_authenticated/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
 }
@@ -234,6 +253,7 @@ export interface FileRouteTypes {
     | '/camera'
     | '/config'
     | '/dashboard'
+    | '/statistics'
     | '/reports/$reportId'
     | '/reports'
   fileRoutesByTo: FileRoutesByTo
@@ -246,6 +266,7 @@ export interface FileRouteTypes {
     | '/camera'
     | '/config'
     | '/dashboard'
+    | '/statistics'
     | '/reports/$reportId'
     | '/reports'
   id:
@@ -258,6 +279,7 @@ export interface FileRouteTypes {
     | '/_authenticated/camera'
     | '/_authenticated/config'
     | '/_authenticated/dashboard'
+    | '/_authenticated/statistics'
     | '/_authenticated/reports/$reportId'
     | '/_authenticated/reports/'
   fileRoutesById: FileRoutesById
@@ -305,6 +327,7 @@ export const routeTree = rootRoute
         "/_authenticated/camera",
         "/_authenticated/config",
         "/_authenticated/dashboard",
+        "/_authenticated/statistics",
         "/_authenticated/reports/$reportId",
         "/_authenticated/reports/"
       ]
@@ -328,6 +351,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/dashboard": {
       "filePath": "_authenticated/dashboard.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/statistics": {
+      "filePath": "_authenticated/statistics.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/reports/$reportId": {
