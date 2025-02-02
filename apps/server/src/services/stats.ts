@@ -15,6 +15,7 @@ type TransformedReport = {
   class: number;
   name: string;
   confidence: number;
+  image: string;
 };
 
 const transformReport = (details: ReportDetail[]): TransformedReport[] => {
@@ -24,6 +25,7 @@ const transformReport = (details: ReportDetail[]): TransformedReport[] => {
       name: e.name,
       confidence: Number((e.confidence * 100).toFixed(2)),
       time: d.createdAt.getTime(),
+      image: d.image,
     })),
   );
 };
@@ -39,12 +41,19 @@ const getLabelOccurrance = (
     {} as Record<string, number>,
   );
 
-type GroupedReport = Record<string, { confidence: number; time: number }[]>;
+type GroupedReport = Record<
+  string,
+  { confidence: number; time: number; label: string }[]
+>;
 
 const groupByLabel = (results: TransformedReport[]): GroupedReport =>
   results.reduce((acc, item) => {
     if (!acc[item.name]) acc[item.name] = [];
-    acc[item.name].push({ time: item.time, confidence: item.confidence });
+    acc[item.name].push({
+      time: item.time,
+      confidence: item.confidence,
+      label: item.name,
+    });
     return acc;
   }, {} as GroupedReport);
 

@@ -12,6 +12,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  ZAxis,
   type TooltipProps,
 } from "recharts";
 import type {
@@ -52,7 +53,7 @@ const CustomTooltip = ({
     return (
       <div className="bg-background p-2 text-sm rounded-md border">
         <p className="font-semibold">
-          Confidence: {payload[0].payload?.confidence}%
+          {payload[0].payload?.label}: {payload[0].payload?.confidence}%
         </p>
       </div>
     );
@@ -76,47 +77,53 @@ function RouteComponent() {
     });
   };
 
-  const HOUR = 60 * 1000;
+  const TIME = 24 * 60 * 60 * 1000;
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          type="number"
-          dataKey="time"
-          name="Time"
-          tickFormatter={formatTime}
-          domain={([min, max]) => [min - HOUR, max + HOUR]}
-          ticks={generateTicks({
-            start: data.metadata.time.min,
-            end: data.metadata.time.max,
-            size: 4,
-          })}
-        />
-        <YAxis
-          type="number"
-          unit={"%"}
-          dataKey="confidence"
-          name="Confidence"
-          domain={[0, 100]}
-        />
-        <Tooltip
-          cursor={{ strokeDasharray: "3 3" }}
-          content={<CustomTooltip />}
-        />
-        <Legend />
-
-        {labels.map((label, index) => (
-          <React.Fragment key={label}>
-            <Scatter
-              name={label}
-              data={data.data[label]}
-              fill={COLOURS[index % COLOURS.length]}
-            />
-          </React.Fragment>
+    <div className="flex flex-col gap-4 w-full">
+      <div className="p-4 rounded-md border">
+        <p className="font-semibold text-lg">Total Kemunculan:</p>
+        {labels.map((label) => (
+          <p>
+            {label}: {data.metadata.occurs[label]}
+          </p>
         ))}
-      </ScatterChart>
-    </ResponsiveContainer>
+      </div>
+      <ResponsiveContainer width="100%" height={400}>
+        <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            type="number"
+            dataKey="time"
+            name="Time"
+            tickFormatter={formatTime}
+            domain={([min, max]) => [min - TIME, max + TIME]}
+          />
+          <YAxis
+            type="number"
+            unit={"%"}
+            dataKey="confidence"
+            name="Confidence"
+            domain={[0, 100]}
+          />
+          <ZAxis type="category" dataKey="label" name="Label" />
+          <Tooltip
+            cursor={{ strokeDasharray: "3 3" }}
+            content={<CustomTooltip />}
+          />
+          <Legend />
+
+          {labels.map((label, index) => (
+            <React.Fragment key={label}>
+              <Scatter
+                name={label}
+                data={data.data[label]}
+                fill={COLOURS[index % COLOURS.length]}
+              />
+            </React.Fragment>
+          ))}
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

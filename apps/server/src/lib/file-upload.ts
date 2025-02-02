@@ -16,7 +16,7 @@ const writeFile = async (file: File) => {
 
   await Bun.write(_path, file);
 
-  const url = "/" + _path.split('\\').slice(-3).join("/");
+  const url = "/" + _path.split("/").slice(-3).join("/");
 
   return {
     mimeType: type,
