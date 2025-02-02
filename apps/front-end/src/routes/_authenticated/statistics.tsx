@@ -28,6 +28,21 @@ export const Route = createFileRoute("/_authenticated/statistics")({
 
 const COLOURS = ["#3B82F6", "#F43F5E", "#22C55E", "#EAB308"];
 
+type GenerateTicks = {
+  start: number;
+  end: number;
+  size: number;
+};
+
+const generateTicks = ({ start, end, size }: GenerateTicks): number[] => {
+  if (size < 2) {
+    return [start, end];
+  }
+
+  const step = Math.floor((end - start) / (size - 1));
+  return Array.from({ length: size }, (_, i) => start + i * step);
+};
+
 const CustomTooltip = ({
   active,
   payload,
@@ -53,9 +68,9 @@ function RouteComponent() {
 
   const formatTime = (time: number) => {
     return new Date(time).toLocaleString("id-ID", {
-      minute: "numeric",
-      hour: "numeric",
-      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      month: "2-digit",
       day: "2-digit",
       year: "2-digit",
     });
@@ -73,6 +88,11 @@ function RouteComponent() {
           name="Time"
           tickFormatter={formatTime}
           domain={([min, max]) => [min - HOUR, max + HOUR]}
+          ticks={generateTicks({
+            start: data.metadata.time.min,
+            end: data.metadata.time.max,
+            size: 4,
+          })}
         />
         <YAxis
           type="number"

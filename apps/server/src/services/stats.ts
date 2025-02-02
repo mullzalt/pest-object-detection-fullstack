@@ -56,9 +56,16 @@ export const statsService = () => {
 
     const occurs = getLabelOccurrance(results);
 
+    const times = results.map((r) => r.time);
+
+    const time = {
+      min: Math.min(...times),
+      max: Math.max(...times),
+    };
+
     const data = groupByLabel(results);
 
-    return { data, metadata: { occurs } };
+    return { data, metadata: { occurs, time } };
   };
 
   return { getReportStats };
